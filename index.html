@@ -543,6 +543,102 @@
                 display: none;
             }
         }
+
+        /* Shake/Spill Animation */
+        .tea-scene.shaking {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .tea-scene.spilled .cup {
+            animation: tiltCup 1s ease-out forwards;
+        }
+
+        .tea-scene.spilled .tea {
+            animation: spillTea 1s ease-out forwards;
+        }
+
+        .tea-scene.spilled .steam {
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* Spill drops */
+        .spill-drop {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #8b4513;
+            border-radius: 50%;
+            opacity: 0;
+        }
+
+        .tea-scene.spilled .spill-drop {
+            animation: dropFall 1.5s ease-out forwards;
+        }
+
+        .spill-drop:nth-child(1) {
+            left: 45%;
+            animation-delay: 0.3s;
+        }
+
+        .spill-drop:nth-child(2) {
+            left: 55%;
+            animation-delay: 0.4s;
+        }
+
+        .spill-drop:nth-child(3) {
+            left: 40%;
+            animation-delay: 0.5s;
+        }
+
+        .spill-drop:nth-child(4) {
+            left: 60%;
+            animation-delay: 0.35s;
+        }
+
+        .spill-drop:nth-child(5) {
+            left: 50%;
+            animation-delay: 0.45s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-10px) rotate(-5deg); }
+            75% { transform: translateX(10px) rotate(5deg); }
+        }
+
+        @keyframes tiltCup {
+            0% { transform: translateX(-50%) rotate(0deg); }
+            100% { transform: translateX(-50%) rotate(25deg); }
+        }
+
+        @keyframes spillTea {
+            0% { 
+                height: 90px;
+                opacity: 1;
+            }
+            50% {
+                height: 60px;
+                opacity: 0.8;
+            }
+            100% { 
+                height: 20px;
+                opacity: 0.3;
+            }
+        }
+
+        @keyframes dropFall {
+            0% {
+                opacity: 1;
+                top: 150px;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                top: 150px;
+                transform: translateY(200px);
+            }
+        }
     </style>
 </head>
 <body>
@@ -556,7 +652,7 @@
         <h1>Taprobane Tea</h1>
         <p class="tagline">Brewing moments of tranquility</p>
         
-        <div class="tea-scene">
+        <div class="tea-scene" id="teaScene">
             <!-- Steam -->
             <div class="steam">
                 <div class="steam-line"></div>
@@ -571,6 +667,13 @@
             <div class="tea-leaf"></div>
             <div class="tea-leaf"></div>
             
+            <!-- Spill drops -->
+            <div class="spill-drop"></div>
+            <div class="spill-drop"></div>
+            <div class="spill-drop"></div>
+            <div class="spill-drop"></div>
+            <div class="spill-drop"></div>
+            
             <!-- Tea Cup and Saucer -->
             <div class="saucer"></div>
             <div class="cup">
@@ -584,5 +687,70 @@
             <p><a href="mailto:info@taprobane.ee">info@taprobane.ee</a></p>
         </div>
     </div>
+
+    <script>
+        // Shake detection for mobile devices
+        let lastShakeTime = 0;
+        let shakeThreshold = 15;
+        let lastX, lastY, lastZ;
+        let hasSpilled = false;
+
+        if (window.DeviceMotionEvent) {
+            window.addEventListener('devicemotion', function(event) {
+                let acceleration = event.accelerationIncludingGravity;
+                let currentTime = new Date().getTime();
+                
+                if ((currentTime - lastShakeTime) > 100) {
+                    let diffTime = currentTime - lastShakeTime;
+                    lastShakeTime = currentTime;
+                    
+                    let x = acceleration.x;
+                    let y = acceleration.y;
+                    let z = acceleration.z;
+                    
+                    if (lastX !== undefined) {
+                        let deltaX = Math.abs(x - lastX);
+                        let deltaY = Math.abs(y - lastY);
+                        let deltaZ = Math.abs(z - lastZ);
+                        
+                        if ((deltaX > shakeThreshold || deltaY > shakeThreshold || deltaZ > shakeThreshold) && !hasSpilled) {
+                            spillTea();
+                        }
+                    }
+                    
+                    lastX = x;
+                    lastY = y;
+                    lastZ = z;
+                }
+            });
+        }
+
+        function spillTea() {
+            hasSpilled = true;
+            const teaScene = document.getElementById('teaScene');
+            
+            // Add shaking effect
+            teaScene.classList.add('shaking');
+            
+            // After shake, spill the tea
+            setTimeout(() => {
+                teaScene.classList.remove('shaking');
+                teaScene.classList.add('spilled');
+                
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    teaScene.classList.remove('spilled');
+                    hasSpilled = false;
+                }, 3000);
+            }, 500);
+        }
+
+        // Desktop testing: Click to simulate shake
+        document.getElementById('teaScene').addEventListener('click', function() {
+            if (!hasSpilled) {
+                spillTea();
+            }
+        });
+    </script>
 </body>
 </html>
