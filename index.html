@@ -14,17 +14,28 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('IMG_0257.webp') center/cover no-repeat fixed;
             color: #333;
             overflow-x: hidden;
             position: relative;
+            min-height: 100vh;
         }
 
         body::before {
             content: '';
             position: fixed;
             inset: 0;
+            background: url('IMG_0257.webp') center/cover no-repeat;
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
             background: linear-gradient(135deg, rgba(26, 77, 46, 0.25) 0%, rgba(45, 95, 63, 0.25) 50%, rgba(74, 124, 89, 0.2) 100%);
+            pointer-events: none;
             z-index: -1;
         }
 
