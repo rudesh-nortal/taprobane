@@ -1,0 +1,1662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taprobane</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: url('IMG_0262.webp') center/cover no-repeat;
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(26, 77, 46, 0.25) 0%, rgba(45, 95, 63, 0.25) 50%, rgba(74, 124, 89, 0.2) 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Tea Cup Animation */
+        .tea-scene-main {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto;
+            animation: floatCup 3s ease-in-out infinite;
+        }
+
+        .tea-cup-image {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: relative;
+            z-index: 5;
+        }
+
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0 1.5rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        /* Interactive Cup Parts as Navigation */
+        .cup-nav {
+            position: absolute;
+            cursor: pointer;
+            transition: opacity 0.3s ease, text-shadow 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border: none;
+            border-radius: 0;
+            padding: 0;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);
+            box-shadow: none;
+            opacity: 0;
+            animation: fadeInNav 0.6s ease-out 1.5s forwards;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        @keyframes fadeInNav {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 0.9;
+            }
+        }
+
+        .cup-nav:hover {
+            opacity: 1;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .cup-nav.active {
+            opacity: 1;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 255, 255, 0.5), 0 0 50px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Cup Body Navigation - Home/Dashboard */
+        .cup-nav.nav-cup {
+            width: 180px;
+            height: auto;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Handle Navigation - Ceylon Tea */
+        .cup-nav.nav-handle {
+            width: auto;
+            height: auto;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 15;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            border: none;
+            background: transparent;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            animation: fadeInNav 0.6s ease-out 1.5s forwards;
+            opacity: 0.9;
+            padding: 0.5rem 1rem;
+        }
+
+        .cup-nav.nav-handle:hover {
+            background: transparent;
+            border: none;
+            opacity: 1;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8), 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .cup-nav.nav-handle.active {
+            background: transparent;
+            border: none;
+            opacity: 1;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.8), 0 0 35px rgba(255, 255, 255, 0.5), 0 0 50px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Saucer Navigation - Tea Facts */
+        .cup-nav.nav-saucer {
+            width: 180px;
+            height: auto;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 15;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .cup {
+            display: none;
+        }
+
+        .tea {
+            display: none;
+        }
+
+        .handle {
+            display: none;
+        }
+
+        .saucer {
+            display: none;
+        }
+
+        .saucer::before {
+            display: none;
+        }
+
+        .steam {
+            display: none;
+        }
+            box-shadow: 0 2px 8px rgba(255, 255, 255, 0.3);
+        }
+
+        .steam {
+            position: absolute;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 150px;
+        }
+
+        .steam-line {
+            position: absolute;
+            width: 4px;
+            height: 50px;
+            background: linear-gradient(to top, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+            border-radius: 50%;
+            animation: steam 3s ease-in-out infinite;
+            filter: blur(2px);
+        }
+
+        .steam-line:nth-child(1) {
+            left: 30%;
+            animation-delay: 0s;
+        }
+
+        .steam-line:nth-child(2) {
+            left: 50%;
+            animation-delay: 0.5s;
+        }
+
+        .steam-line:nth-child(3) {
+            left: 70%;
+            animation-delay: 1s;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        @keyframes slideLeft {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fillTea {
+            from {
+                height: 0;
+            }
+            to {
+                height: 90px;
+            }
+        }
+
+        @keyframes floatCup {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        @keyframes steam {
+            0% {
+                opacity: 0;
+                transform: translateY(0) scaleX(1);
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80px) scaleX(1.5);
+            }
+        }
+
+        @keyframes ripple {
+            0%, 100% {
+                transform: scaleX(1);
+            }
+            50% {
+                transform: scaleX(1.1);
+            }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header h1 {
+            font-family: 'Georgia', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-style: italic;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Navigation - Hidden */
+        .nav {
+            display: none;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Section Styles */
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Card Styles */
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.2);
+            animation: cardFadeIn 0.6s ease-out;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card h2 {
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .card h3 {
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .card p {
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Grid Layouts */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        /* Leaderboard */
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            margin-bottom: 0.75rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .leaderboard-item:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: rgba(255, 255, 255, 0.9);
+            min-width: 50px;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+        }
+
+        .rank.gold { 
+            color: #ffd700; 
+            text-shadow: 0 2px 8px rgba(255, 215, 0, 0.6), 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+        .rank.silver { 
+            color: #e8e8e8; 
+            text-shadow: 0 2px 8px rgba(232, 232, 232, 0.6), 0 0 15px rgba(232, 232, 232, 0.3);
+        }
+        .rank.bronze { 
+            color: #ffb347; 
+            text-shadow: 0 2px 8px rgba(255, 179, 71, 0.6), 0 0 15px rgba(255, 179, 71, 0.3);
+        }
+
+        .country-name {
+            flex: 1;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .consumption {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.85);
+            font-weight: 600;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 0;
+            padding-top: 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            padding: 1rem 1.25rem;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            opacity: 0;
+            animation: statCardFadeIn 0.6s ease-out forwards;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex: 0 1 auto;
+            min-width: 140px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.2s; }
+        .stat-card:nth-child(2) { animation-delay: 0.4s; }
+        .stat-card:nth-child(3) { animation-delay: 0.6s; }
+        .stat-card:nth-child(4) { animation-delay: 0.8s; }
+
+        @keyframes statCardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            opacity: 0.95;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Tea Facts */
+        .fact-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            transition: all 0.3s ease;
+        }
+
+        .fact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .fact-card h4 {
+            color: rgba(255, 255, 255, 0.95);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .fact-card p {
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .fact-card strong {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        /* Chart Container */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+        }
+
+        /* Status Message */
+        .status {
+            text-align: center;
+            padding: 1rem;
+            color: #666;
+            font-style: italic;
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+            transition: opacity 0.3s;
+        }
+
+        .footer a:hover {
+            opacity: 0.8;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                padding: 0 1.5rem;
+            }
+
+            .cup-nav.nav-cup {
+                font-size: 0.85rem;
+            }
+
+            .cup-nav.nav-handle {
+                font-size: 0.7rem;
+            }
+
+            .cup-nav.nav-saucer {
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .tea-scene-main {
+                transform: scale(0.75);
+                margin: 0 auto;
+            }
+
+            .cup-nav.nav-cup {
+                font-size: 0.8rem;
+            }
+
+            .cup-nav.nav-handle {
+                font-size: 0.65rem;
+            }
+
+            .cup-nav.nav-saucer {
+                font-size: 0.7rem;
+            }
+
+            .hero-section {
+                padding: 1.5rem 0 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header .subtitle {
+                font-size: 0.95rem;
+                padding: 0 1rem;
+            }
+            
+            .nav-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .stat-label {
+                font-size: 0.7rem;
+            }
+
+            .stat-card {
+                padding: 0.85rem 1rem;
+                min-width: 120px;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .card h2 {
+                font-size: 1.5rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tea-scene-main {
+                transform: scale(0.6);
+                margin: 0 auto;
+            }
+
+            .cup-nav.nav-cup {
+                font-size: 0.75rem;
+            }
+
+            .cup-nav.nav-handle {
+                font-size: 0.6rem;
+            }
+
+            .cup-nav.nav-saucer {
+                font-size: 0.65rem;
+            }
+
+            .hero-section {
+                padding: 1rem 0 0.5rem;
+            }}
+
+            .cup-nav.nav-handle {
+                font-size: 0.6rem;
+                right: 8px;
+            }
+
+            .cup-nav.nav-saucer {
+                font-size: 0.65rem;
+            }
+
+            .hero-section {
+                padding: 1rem 0 0.5rem;
+            }
+
+            .header {
+                padding: 1.5rem 0;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+
+            .header .subtitle {
+                font-size: 0.85rem;
+            }
+
+            .nav {
+                padding: 0.75rem 0;
+            }
+
+            .nav-btn {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.85rem;
+            }
+
+            .container {
+                margin: 1rem auto;
+            }
+
+            .card {
+                padding: 1.25rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .card h2 {
+                font-size: 1.3rem;
+            }
+
+            .stats-grid {
+                gap: 0.75rem;
+            }
+
+            .stat-card {
+                padding: 0.75rem 0.85rem;
+                min-width: 100px;
+            }
+
+            .stat-value {
+                font-size: 1.25rem;
+            }
+
+            .stat-label {
+                font-size: 0.65rem;
+            }
+
+            .chart-container {
+                height: 250px;
+                margin: 1rem 0;
+            }
+
+            .leaderboard-item {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .rank {
+                font-size: 1.25rem;
+                min-width: 40px;
+            }
+
+            .consumption {
+                font-size: 0.95rem;
+            }
+
+            .fact-card {
+                padding: 1rem;
+            }
+
+            .fact-card h4 {
+                font-size: 0.95rem;
+            }
+
+            .fact-card p {
+                font-size: 0.85rem;
+            }
+
+            .footer {
+                padding: 1.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .tea-scene-main {
+                transform: scale(0.5);
+                margin: 0 auto;
+            }
+
+            .cup-nav.nav-cup {
+                font-size: 0.7rem;
+            }
+
+            .cup-nav.nav-handle {
+                font-size: 0.55rem;
+            }
+
+            .cup-nav.nav-saucer {
+                font-size: 0.6rem;
+            }
+
+            .hero-section {
+                padding: 0.75rem 0 0.25rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header .subtitle {
+                font-size: 0.8rem;
+            }
+
+            .nav-btn {
+                padding: 0.5rem 0.6rem;
+                font-size: 0.8rem;
+                border-radius: 15px;
+            }
+
+            .stat-value {
+                font-size: 1.1rem;
+            }
+
+            .stat-label {
+                font-size: 0.6rem;
+            }
+
+            .stat-card {
+                padding: 0.65rem 0.75rem;
+                min-width: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <h1>Taprobane</h1>
+        <p class="subtitle">Brewing moments of tranquility</p>
+    </div>
+
+    <!-- Navigation removed - integrated into tea cup -->
+
+    <!-- Main Container -->
+    <!-- Tea Cup Navigation - Always Visible -->
+    <div class="hero-section">
+        <div class="tea-scene-main">
+            <!-- Navigation overlays on cup parts -->
+            <div class="cup-nav nav-cup active" onclick="showSection('dashboard')">
+                Home
+            </div>
+            <div class="cup-nav nav-handle" onclick="showSection('ceylon')">
+                Ceylon
+            </div>
+            <div class="cup-nav nav-saucer" onclick="showSection('facts')">
+                Facts
+            </div>
+
+            <!-- Tea Cup Image -->
+            <img src="IMG_0292.webp" alt="Tea Cup" class="tea-cup-image">
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="section active">
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">6.3B</div>
+                    <div class="stat-label">Kilograms Consumed Annually</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">195+</div>
+                    <div class="stat-label">Countries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">2nd</div>
+                    <div class="stat-label">Most Consumed Beverage</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">3,000+</div>
+                    <div class="stat-label">Years of History</div>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2>Tea Consumption by Region</h2>
+                    <div class="chart-container">
+                        <canvas id="regionChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Top 5 Tea Consumers</h2>
+                    <div class="chart-container">
+                        <canvas id="topCountriesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Top Tea-Consuming Countries</h2>
+                <p style="margin-bottom: 1.5rem; color: rgba(255, 255, 255, 0.8);">Annual per capita consumption (kg/person/year)</p>
+                <div id="leaderboardContent"></div>
+            </div>
+
+            <div class="card">
+                <h2>Global Tea Consumption Map</h2>
+                <div class="chart-container">
+                    <canvas id="consumptionChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Tea Consumption Trends (10-Year Historical)</h2>
+                <div class="chart-container" style="height: 500px;">
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h2>Growth by Tea Type</h2>
+                    <div class="chart-container">
+                        <canvas id="teaTypesChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2>Market Share</h2>
+                    <div class="chart-container">
+                        <canvas id="marketShareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ceylon Tea Section -->
+        <div id="ceylon" class="section">
+            <div class="card">
+                <h2>Ceylon Tea Heritage</h2>
+                <p style="margin-bottom: 2rem; color: rgba(255, 255, 255, 0.85); font-size: 1.1rem; line-height: 1.8;">Ceylon Tea, from the island nation of Sri Lanka (formerly Ceylon), is renowned worldwide for its exceptional quality, distinctive flavor, and rich heritage dating back to 1867.</p>
+                
+                <div class="grid-2">
+                    <div class="fact-card">
+                        <h4>Elevation Grades</h4>
+                        <p><strong>High Grown (above 4,000ft):</strong> Delicate, fragrant teas from Nuwara Eliya and Uva regions with bright, crisp flavors.</p>
+                        <p style="margin-top: 0.5rem;"><strong>Medium Grown (2,000-4,000ft):</strong> Well-balanced teas from Kandy and Dimbula with rich taste.</p>
+                        <p style="margin-top: 0.5rem;"><strong>Low Grown (below 2,000ft):</strong> Full-bodied, robust teas from Ruhuna with strong character.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h4>Global Standing</h4>
+                        <p>Sri Lanka is the world's 4th largest tea producer and the 2nd largest exporter of orthodox tea globally.</p>
+                        <p style="margin-top: 0.5rem;">Ceylon Tea accounts for approximately 19% of global tea exports, reaching over 140 countries.</p>
+                        <p style="margin-top: 0.5rem;">Annual production: ~300,000 metric tons.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h4>Unique Characteristics</h4>
+                        <p>Ceylon Tea is 100% pure, with no additives or preservatives. The Lion Logo certifies authenticity.</p>
+                        <p style="margin-top: 0.5rem;">Varieties include black, green, white, and oolong teas, each with distinct profiles influenced by terroir.</p>
+                        <p style="margin-top: 0.5rem;">Hand-picked using the "two leaves and a bud" method for premium quality.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h4>Historical Legacy</h4>
+                        <p>Tea was introduced to Sri Lanka by James Taylor in 1867 in Loolecondera Estate, Kandy.</p>
+                        <p style="margin-top: 0.5rem;">The industry flourished after the coffee blight of 1869, transforming the island's economy.</p>
+                        <p style="margin-top: 0.5rem;">Over 150 years of tea heritage with traditional methods still preserved.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h4>Famous Regions</h4>
+                        <p><strong>Nuwara Eliya:</strong> "Champagne of Ceylon Tea" - light, delicate, with floral notes.</p>
+                        <p style="margin-top: 0.5rem;"><strong>Dimbula:</strong> Bright, full-bodied with excellent aroma.</p>
+                        <p style="margin-top: 0.5rem;"><strong>Uva:</strong> Distinctive seasonal quality with subtle hints.</p>
+                    </div>
+                    
+                    <div class="fact-card">
+                        <h4>Economic Impact</h4>
+                        <p>Tea industry employs over 1 million Sri Lankans directly and indirectly.</p>
+                        <p style="margin-top: 0.5rem;">Contributes approximately 2% to Sri Lanka's GDP and 15% to export earnings.</p>
+                        <p style="margin-top: 0.5rem;">One of the oldest and most sustainable plantation industries in the country.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Facts Section -->
+        <div id="facts" class="section">
+            <div class="card">
+                <h2>Fascinating Tea Facts</h2>
+                <div class="grid-2">
+                    <div class="fact-card">
+                        <h4>Ancient Origins</h4>
+                        <p>Tea was first discovered in ancient China around 2737 BCE, when leaves from a wild tree blew into Emperor Shen Nung's boiling water.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>Global Favorite</h4>
+                        <p>Tea is the second most consumed beverage in the world after water, with over 3 billion cups consumed daily.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>One Plant, Many Types</h4>
+                        <p>All true teas (black, green, white, oolong, pu-erh) come from the same plant: Camellia sinensis. The difference is in processing.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>Health Benefits</h4>
+                        <p>Tea is rich in antioxidants called polyphenols, which may help reduce the risk of chronic diseases and improve heart health.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>British Tradition</h4>
+                        <p>The British drink an estimated 100 million cups of tea every day, or 36 billion cups per year.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>High Altitude Quality</h4>
+                        <p>The finest teas are often grown at high altitudes where cooler temperatures slow growth, allowing more complex flavors to develop.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>China's Production</h4>
+                        <p>China produces about 40% of the world's tea, followed by India, Kenya, and Sri Lanka (Taprobane).</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>Perfect Temperature</h4>
+                        <p>Green tea should be brewed at 160-180°F (70-80°C), while black tea needs boiling water at 200-212°F (93-100°C).</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>Turkey's Consumption</h4>
+                        <p>Turkey has the highest per capita tea consumption in the world at approximately 3.5 kg per person per year.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>World's Most Expensive</h4>
+                        <p>Da-Hong Pao, a rare Chinese tea, can cost over $1.2 million per kilogram, making it more valuable than gold.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>Sustainability</h4>
+                        <p>Tea plants can live for over 100 years, and some tea trees in China are over 3,000 years old and still producing leaves.</p>
+                    </div>
+                    <div class="fact-card">
+                        <h4>Japanese Ceremony</h4>
+                        <p>The Japanese tea ceremony (Chanoyu) is a choreographed ritual of preparing and serving matcha green tea, representing harmony, respect, purity, and tranquility.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p><a href="tel:+37255585572">+372 5558 5572</a> | <a href="mailto:info@taprobane.ee">info@taprobane.ee</a></p>
+    </div>
+
+    <script>
+        // Navigation with Cup Parts
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Remove active class from all cup nav elements
+            document.querySelectorAll('.cup-nav').forEach(nav => {
+                nav.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Add active class to clicked cup part
+            event.target.closest('.cup-nav').classList.add('active');
+            
+            // Smooth scroll to top of container
+            window.scrollTo({ 
+                top: 0, 
+                behavior: 'smooth' 
+            });
+        }
+
+        // Tea consumption data (mock data based on FAO statistics)
+        const teaData = {
+            countries: [
+                { name: 'Turkey', consumption: 3.5, total: 295000 },
+                { name: 'Ireland', consumption: 2.2, total: 11000 },
+                { name: 'United Kingdom', consumption: 1.9, total: 125000 },
+                { name: 'Iran', consumption: 1.8, total: 152000 },
+                { name: 'Russia', consumption: 1.4, total: 200000 },
+                { name: 'Morocco', consumption: 1.4, total: 52000 },
+                { name: 'New Zealand', consumption: 1.3, total: 6500 },
+                { name: 'Egypt', consumption: 1.1, total: 110000 },
+                { name: 'Poland', consumption: 1.0, total: 38000 },
+                { name: 'Japan', consumption: 1.0, total: 126000 },
+                { name: 'China', consumption: 0.9, total: 1260000 },
+                { name: 'India', consumption: 0.8, total: 1100000 },
+                { name: 'Pakistan', consumption: 0.7, total: 154000 },
+                { name: 'Kenya', consumption: 0.6, total: 32000 },
+                { name: 'Sri Lanka', consumption: 1.5, total: 33000 }
+            ],
+            regions: {
+                'Asia': 3200000,
+                'Europe': 850000,
+                'Africa': 450000,
+                'Middle East': 380000,
+                'Americas': 320000,
+                'Oceania': 45000
+            },
+            trends: {
+                years: ['2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'],
+                china: [1095, 1140, 1185, 1220, 1250, 1260, 1270, 1280, 1290, 1300, 1315],
+                india: [985, 1015, 1040, 1060, 1075, 1080, 1090, 1095, 1100, 1110, 1125],
+                turkey: [255, 265, 270, 275, 280, 285, 288, 290, 293, 295, 298],
+                uk: [133, 132, 130, 128, 127, 126, 125, 125, 125, 125, 124],
+                russia: [175, 180, 185, 190, 193, 195, 197, 198, 199, 200, 202]
+            },
+            teaTypes: {
+                labels: ['Black Tea', 'Green Tea', 'Oolong', 'White Tea', 'Pu-erh', 'Herbal'],
+                data: [78, 15, 3, 2, 1, 1]
+            }
+        };
+
+        // Initialize Charts
+        function initCharts() {
+            // Region Chart
+            new Chart(document.getElementById('regionChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(teaData.regions),
+                    datasets: [{
+                        data: Object.values(teaData.regions),
+                        backgroundColor: [
+                            'rgba(255, 255, 255, 0.9)',
+                            'rgba(255, 255, 255, 0.75)',
+                            'rgba(255, 255, 255, 0.6)',
+                            'rgba(255, 255, 255, 0.45)',
+                            'rgba(255, 255, 255, 0.3)',
+                            'rgba(255, 255, 255, 0.2)'
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.95)',
+                                font: {
+                                    size: 13,
+                                    weight: '500'
+                                },
+                                padding: 10
+                            }
+                        },
+                        title: {
+                            display: false
+                        },
+                        tooltip: {
+                            titleColor: 'rgba(255, 255, 255, 0.95)',
+                            bodyColor: 'rgba(255, 255, 255, 0.9)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Top Countries Bar Chart
+            const topCountries = teaData.countries.slice(0, 5);
+            new Chart(document.getElementById('topCountriesChart'), {
+                type: 'bar',
+                data: {
+                    labels: topCountries.map(c => c.name),
+                    datasets: [{
+                        label: 'kg per capita',
+                        data: topCountries.map(c => c.consumption),
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        borderColor: 'rgba(255, 255, 255, 0.95)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            titleColor: 'rgba(255, 255, 255, 0.95)',
+                            bodyColor: 'rgba(255, 255, 255, 0.9)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.9)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'kg/person/year',
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Consumption by Country
+            new Chart(document.getElementById('consumptionChart'), {
+                type: 'bar',
+                data: {
+                    labels: teaData.countries.slice(0, 10).map(c => c.name),
+                    datasets: [{
+                        label: 'Total Consumption (tons)',
+                        data: teaData.countries.slice(0, 10).map(c => c.total),
+                        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+                        borderColor: 'rgba(255, 255, 255, 0.95)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            titleColor: 'rgba(255, 255, 255, 0.95)',
+                            bodyColor: 'rgba(255, 255, 255, 0.9)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Trends Line Chart
+            new Chart(document.getElementById('trendsChart'), {
+                type: 'line',
+                data: {
+                    labels: teaData.trends.years,
+                    datasets: [
+                        {
+                            label: 'China',
+                            data: teaData.trends.china,
+                            borderColor: 'rgba(255, 255, 255, 0.95)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(255, 255, 255, 0.95)',
+                            pointBorderColor: 'rgba(255, 255, 255, 0.95)',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'India',
+                            data: teaData.trends.india,
+                            borderColor: 'rgba(255, 255, 255, 0.8)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(255, 255, 255, 0.8)',
+                            pointBorderColor: 'rgba(255, 255, 255, 0.8)',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Turkey',
+                            data: teaData.trends.turkey,
+                            borderColor: 'rgba(255, 255, 255, 0.65)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.06)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(255, 255, 255, 0.65)',
+                            pointBorderColor: 'rgba(255, 255, 255, 0.65)',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'United Kingdom',
+                            data: teaData.trends.uk,
+                            borderColor: 'rgba(255, 255, 255, 0.5)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(255, 255, 255, 0.5)',
+                            pointBorderColor: 'rgba(255, 255, 255, 0.5)',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Russia',
+                            data: teaData.trends.russia,
+                            borderColor: 'rgba(255, 255, 255, 0.35)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                            borderWidth: 3,
+                            tension: 0.4,
+                            pointBackgroundColor: 'rgba(255, 255, 255, 0.35)',
+                            pointBorderColor: 'rgba(255, 255, 255, 0.35)',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.95)',
+                                font: {
+                                    size: 13,
+                                    weight: '500'
+                                },
+                                padding: 10
+                            }
+                        },
+                        tooltip: {
+                            titleColor: 'rgba(255, 255, 255, 0.95)',
+                            bodyColor: 'rgba(255, 255, 255, 0.9)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 12,
+                                    weight: '500'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            title: {
+                                display: true,
+                                text: 'Consumption (1000 tons)',
+                                color: 'rgba(255, 255, 255, 0.9)',
+                                font: {
+                                    size: 13,
+                                    weight: '600'
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Tea Types Pie Chart
+            new Chart(document.getElementById('teaTypesChart'), {
+                type: 'pie',
+                data: {
+                    labels: teaData.teaTypes.labels,
+                    datasets: [{
+                        data: teaData.teaTypes.data,
+                        backgroundColor: [
+                            'rgba(255, 255, 255, 0.9)',
+                            'rgba(255, 255, 255, 0.75)',
+                            'rgba(255, 255, 255, 0.6)',
+                            'rgba(255, 255, 255, 0.45)',
+                            'rgba(255, 255, 255, 0.3)',
+                            'rgba(255, 255, 255, 0.2)'
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.95)',
+                                font: {
+                                    size: 13,
+                                    weight: '500'
+                                },
+                                padding: 10
+                            }
+                        },
+                        tooltip: {
+                            titleColor: 'rgba(255, 255, 255, 0.95)',
+                            bodyColor: 'rgba(255, 255, 255, 0.9)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Market Share Doughnut
+            new Chart(document.getElementById('marketShareChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['China', 'India', 'Kenya', 'Sri Lanka', 'Others'],
+                    datasets: [{
+                        data: [40, 25, 8, 5, 22],
+                        backgroundColor: [
+                            'rgba(255, 255, 255, 0.9)',
+                            'rgba(255, 255, 255, 0.75)',
+                            'rgba(255, 255, 255, 0.6)',
+                            'rgba(255, 255, 255, 0.45)',
+                            'rgba(255, 255, 255, 0.3)'
+                        ],
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: 'rgba(255, 255, 255, 0.95)',
+                                font: {
+                                    size: 13,
+                                    weight: '500'
+                                },
+                                padding: 10
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Global Tea Production (%)',
+                            color: 'rgba(255, 255, 255, 0.95)',
+                            font: {
+                                size: 15,
+                                weight: 'bold'
+                            },
+                            padding: 15
+                        },
+                        tooltip: {
+                            titleColor: 'rgba(255, 255, 255, 0.95)',
+                            bodyColor: 'rgba(255, 255, 255, 0.9)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.85)',
+                            borderColor: 'rgba(255, 255, 255, 0.3)',
+                            borderWidth: 1,
+                            padding: 12,
+                            cornerRadius: 8,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            bodyFont: {
+                                size: 13
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generate Leaderboard
+        function generateLeaderboard() {
+            const leaderboardContent = document.getElementById('leaderboardContent');
+            leaderboardContent.innerHTML = teaData.countries.map((country, index) => {
+                let rankClass = '';
+                let medal = '';
+                if (index === 0) { rankClass = 'gold'; medal = '🥇'; }
+                else if (index === 1) { rankClass = 'silver'; medal = '🥈'; }
+                else if (index === 2) { rankClass = 'bronze'; medal = '🥉'; }
+                
+                return `
+                    <div class="leaderboard-item">
+                        <div class="rank ${rankClass}">${medal || (index + 1)}</div>
+                        <div class="country-name">${country.name}</div>
+                        <div class="consumption">${country.consumption} kg/year</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            generateLeaderboard();
+        });
+    </script>
+</body>
+</html>
